@@ -129,6 +129,48 @@ void link_read(char *name) {
     link_options(choice, name);
 }
 
+void print_dir_menu() {
+    printf("Menu for directory \n");
+    printf("1. Directory name -n \n");
+    printf("2. Size -d \n");
+    printf("3. Access rights -a \n");
+    printf("4. Total number of files with the .c extension -c \n");
+}
+
+void dir_options(char * choice, char * name) {
+    for(int i = 1; i < strlen(choice); i++) {
+        printf("%c ", choice[i]);
+        if(choice[i] == 'n')
+            printf("Directory name is %s \n", name);
+        if(choice[i] == 'd')
+            printf("Directo size is %ld\n", inf.st_size);
+    }
+}
+
+void dir_read(char *name) {
+    int is_valid;
+    do {
+        is_valid = 1;
+        print_reg_menu();
+        scanf("%s", choice);
+        if(choice[0] != '-') {
+            is_valid = 0;
+            system("clear");
+            printf("Your option choice is not valid!\n");
+        }
+        else {
+            for(int i = 1; i < strlen(choice); i++)
+                if(strchr("ndac", choice[i]) == NULL) {
+                    is_valid = 0;
+                    system("clear");
+                    printf("Your option choice is not valid!\n");
+                    break;
+                }
+        }
+    } while(!is_valid);
+
+    dir_options(choice, name);
+}
 
 
 int main(int argc, char * argv[]) {
