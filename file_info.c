@@ -175,11 +175,30 @@ void dir_read(char *name) {
     dir_options(choice, name);
 }
 
+void checkCfile(char *path) {
+    regex_t extensionC;
+    if(regcomp(&extensionC,".c$",REG_EXTENDED !=0)) {
+        printf("Error compiling .c regular expression \n");
+    }
+
+    if(regexec(&extensionC,path, 0, NULL, 0) == 0) {
+        pid_t cpid = fork();
+        if(cpid == -1)
+        {
+            perror("Fork failure \n");
+            exit(EXIT_FAILURE);
+        }
+    
+        if(cpid == 0) {
+        execlp("bash","bash","checkerr.sh",path,"errfile.txt",NULL);
+        printf("!GOOOD");
+        exit(1);
+            
+        }  
+    }
+}
+
 void process_file(struct stat inf,char *path) {
-   
-   DIR *dir;
-   regex_t extension,extensionC;
-   char *validCommands;
    
     pid_t pid = fork();
     if(pid == -1) {
@@ -201,6 +220,10 @@ void process_file(struct stat inf,char *path) {
             printf("directory\n");
         }
     }
+
+    checkCfile(path);
+
+    wait(NULL);
     wait(NULL);
 }
 
