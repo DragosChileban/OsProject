@@ -10,6 +10,9 @@
 #include <time.h>
 #include <sys/sysmacros.h>
 #include <fcntl.h>
+#include <dirent.h>
+#include <regex.h>
+#include <sys/wait.h>
 
 
 struct stat inf; 
@@ -172,29 +175,46 @@ void dir_read(char *name) {
     dir_options(choice, name);
 }
 
-
-int main(int argc, char * argv[]) {
- 
-    // printf("%d arguments\n", argc);
- 
-    for(int i = 1; i < argc; i++) {
-        printf("Current file:  %s is a ", argv[i]);
-        if(lstat(argv[i],&inf) == -1) {
-            perror("lstat() error");
-            exit(EXIT_FAILURE);
-        }
+void process_file(struct stat inf,char *path) {
+   
+   DIR *dir;
+   regex_t extension,extensionC;
+   char *validCommands;
+   
+    pid_t pid = fork();
+    if(pid == -1) {
+        perror("Fork failure \n");
+        exit(EXIT_FAILURE);
+    }
+    if(pid == 0) {
+        printf("Current file:  %s is a ", path);
  
         if (S_ISREG(inf.st_mode)) {
             printf("regular file\n");
-            reg_read(argv[i]);
+            reg_read(path);
         }
         if(S_ISLNK(inf.st_mode)) {
             printf("symbolic link\n");
-            link_read(argv[i]);
+            link_read(path);
         }
         if(S_ISDIR(inf.st_mode)) {
             printf("directory\n");
         }
+    }
+    wait(NULL);
+}
+
+
+int main(int argc, char * argv[]) {
+ 
+    struct stat inf;
+ 
+    for(int i = 1; i < argc; i++) {
+        if (lstat(argv[i], &inf) == -1) {
+            perror("lstat");
+            exit(EXIT_FAILURE);
+        }
+        process_file(inf, argv[i]);
     }
     return 0;
 }
