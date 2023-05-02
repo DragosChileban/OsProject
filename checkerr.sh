@@ -17,6 +17,6 @@ then
     gcc -Wall $1 2> $2      
     counterError=`cat $2 | grep -c "$errorReg"`
     counterWarnings=`cat $2 | grep -c "$warningsReg"`
-    echo ""
-    echo " Total number of errors and warnings in the file $1 :  Error -> $counterError Warnings -> $counterWarnings"
+    # echo ""
+    echo "$counterError $counterWarnings "
 fi

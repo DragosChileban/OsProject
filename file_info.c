@@ -177,54 +177,70 @@ void dir_read(char *name) {
 
 void checkCfile(char *path) {
     regex_t extensionC;
+    char buff[512];
     if(regcomp(&extensionC,".c$",REG_EXTENDED !=0)) {
         printf("Error compiling .c regular expression \n");
     }
 
     if(regexec(&extensionC,path, 0, NULL, 0) == 0) {
+        int pfd[2];
+        // int pid;
+        if(pipe(pfd)<0) {
+            perror("Pipe creation error\n");
+            exit(1);
+        }
         pid_t cpid = fork();
-        if(cpid == -1)
-        {
+        if(cpid == -1) {
             perror("Fork failure \n");
             exit(EXIT_FAILURE);
         }
     
         if(cpid == 0) {
-        execlp("bash","bash","checkerr.sh",path,"errfile.txt",NULL);
-        printf("!GOOOD");
-        exit(1);
-            
+            close(pfd[0]); 
+            dup2(pfd[1], 1);
+            execlp("bash","bash","checkerr.sh",path,"errfile.txt",NULL);
+            printf("!GOOOD");
+            exit(1);     
         }  
+        close(pfd[1]);
+        read(pfd[0],buff,512);
+        char *p;
+        p = strtok(buff, " ");
+        int nr_err = atoi(p);
+        p = strtok(NULL, " ");
+        int nr_war = atoi(p);
+        printf("%d %d\n", nr_err, nr_war);
     }
+
 }
 
 void process_file(struct stat inf,char *path) {
    
-    pid_t pid = fork();
-    if(pid == -1) {
-        perror("Fork failure \n");
-        exit(EXIT_FAILURE);
-    }
-    if(pid == 0) {
-        printf("Current file:  %s is a ", path);
+    // pid_t pid = fork();
+    // if(pid == -1) {
+    //     perror("Fork failure \n");
+    //     exit(EXIT_FAILURE);
+    // }
+    // if(pid == 0) {
+    //     printf("Current file:  %s is a ", path);
  
-        if (S_ISREG(inf.st_mode)) {
-            printf("regular file\n");
-            reg_read(path);
-        }
-        if(S_ISLNK(inf.st_mode)) {
-            printf("symbolic link\n");
-            link_read(path);
-        }
-        if(S_ISDIR(inf.st_mode)) {
-            printf("directory\n");
-        }
-    }
+    //     if (S_ISREG(inf.st_mode)) {
+    //         printf("regular file\n");
+    //         reg_read(path);
+    //     }
+    //     if(S_ISLNK(inf.st_mode)) {
+    //         printf("symbolic link\n");
+    //         link_read(path);
+    //     }
+    //     if(S_ISDIR(inf.st_mode)) {
+    //         printf("directory\n");
+    //     }
+    // }
 
     checkCfile(path);
 
     wait(NULL);
-    wait(NULL);
+    // wait(NULL);
 }
 
 
