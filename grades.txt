@@ -2,3 +2,6 @@
 <test.c>: <10>
 <process.c>: <1>
 <process.c>: <1>
+<test.c>: <10>
+<test.c>: <10>
+<process.c>: <1>

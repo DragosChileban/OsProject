@@ -15,7 +15,6 @@
 #include <sys/wait.h>
 
 
-struct stat inf; 
 char choice[10];
 int nr_childs;
 
@@ -84,7 +83,7 @@ void print_reg_menu() {
     printf("6. Create a symbolic link give:link name -l \n");
 }
 
-void reg_options(char * choice, char * name) {
+void reg_options(struct stat inf, char * choice, char * name) {
     for(int i = 1; i < strlen(choice); i++) {
         printf("%c ", choice[i]);
         if(choice[i] == 'n')
@@ -104,7 +103,6 @@ void reg_options(char * choice, char * name) {
             printf("Introduce the name of the new link\n");
             char link[100];
             scanf("%s",link);
-            // symlink(name,link);
             if (symlink(name, link) == -1) {
                 fprintf(stderr, "ERROR!\n");
                 fprintf(stderr, "Could not create the symbolic link!");
@@ -115,7 +113,7 @@ void reg_options(char * choice, char * name) {
     printf("\n");
 }
 
-void reg_read(char *name) {
+void reg_read(struct stat inf, char *name) {
     int is_valid;
     do {
         is_valid = 1;
@@ -137,7 +135,7 @@ void reg_read(char *name) {
         }
     } while(!is_valid);
 
-    reg_options(choice, name);
+    reg_options(inf, choice, name);
 }
 
 void print_link_menu() {
@@ -150,7 +148,7 @@ void print_link_menu() {
     printf("5. Access rights -a \n");
 }
 
-void link_options(char * choice, char * name) {
+void link_options(struct stat inf, char * choice, char * name) {
     
     for(int i = 1; i < strlen(choice); i++) {
         printf("%c ", choice[i]);
@@ -176,7 +174,7 @@ void link_options(char * choice, char * name) {
     
 }
 
-void link_read(char *name) {
+void link_read(struct stat inf, char *name) {
     int is_valid;
     do {
         is_valid = 1;
@@ -198,7 +196,7 @@ void link_read(char *name) {
         }
     } while(!is_valid);
 
-    link_options(choice, name);
+    link_options(inf, choice, name);
 }
 
 int nr_c_files(DIR *dir, char *path) {
@@ -242,7 +240,7 @@ void print_dir_menu() {
     printf("4. Total number of files with the .c extension -c \n");
 }
 
-void dir_options(char * choice, char * name) {
+void dir_options(struct stat inf, char * choice, char * name) {
     DIR *dir;
     
     for(int i = 1; i < strlen(choice); i++) {
@@ -258,7 +256,7 @@ void dir_options(char * choice, char * name) {
         if(choice[i] == 'c') {
             dir = opendir(name);
             if(dir == NULL) {
-                printf("Error could not open the directory");
+                printf("Error! Could not open the directory");
             }
             strcat(name,"/");
             int nr_c = nr_c_files(dir, name);
@@ -267,7 +265,7 @@ void dir_options(char * choice, char * name) {
     }
 }
 
-void dir_read(char *name) {
+void dir_read(struct stat inf, char *name) {
     int is_valid;
     do {
         is_valid = 1;
@@ -289,7 +287,7 @@ void dir_read(char *name) {
         }
     } while(!is_valid);
 
-    dir_options(choice, name);
+    dir_options(inf, choice, name);
 }
 
 int compute_score(int err, int war) {
@@ -417,16 +415,17 @@ void check_menu(struct stat inf,char *path) {
  
         if (S_ISREG(inf.st_mode)) {
             printf("regular file\n");
-            reg_read(path);
+            reg_read(inf, path);
         }
         if(S_ISLNK(inf.st_mode)) {
             printf("symbolic link\n");
-            link_read(path);
+            link_read(inf, path);
         }
         if(S_ISDIR(inf.st_mode)) {
             printf("directory\n");
-            dir_read(path);
+            dir_read(inf, path);
         }
+        exit(0);
     }
 }
 
@@ -451,8 +450,8 @@ void process_file(struct stat inf,char *path) {
         f = fopen("grades.txt", "a");
         fprintf(f, "<%s>: <%d>\n", path, score);
         fclose(f);
-        printf("The score is: %d\n", score);
-        printf("\n\n");
+        // printf("The score is: %d\n", score);
+        // printf("\n\n");
     }
     
 }
