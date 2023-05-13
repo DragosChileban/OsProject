@@ -1,22 +1,21 @@
 #!/bin/bash
-if test $# -ne 2 
- then 
-    echo "Usage: $0 <file>"
-    exit 1
-fi
-errorReg="error:*"
-warningsReg="warning:*"
-count=0
-if ! test -f $2 ||  test -h $2
-then
-    exit 2
+
+# Check if a C file was provided as an argument
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 <C file>"
+  exit 1
 fi
 
-if test -f $1 || ! test -h $1  
-then 
-    gcc -Wall $1 2> $2      
-    counterError=`cat $2 | grep -c "$errorReg"`
-    counterWarnings=`cat $2 | grep -c "$warningsReg"`
-    # echo ""
-    echo "$counterError $counterWarnings "
-fi
+# Compile the C file and redirect stderr to a temporary file
+gcc -o /dev/null "$1" 2> /tmp/compiler_output
+
+# Count the number of errors and warnings
+errors=$(grep -c "error:" /tmp/compiler_output)
+warnings=$(grep -c "warning:" /tmp/compiler_output)
+
+# echo "Compilation complete"
+echo "$errors $warnings "
+
+# Clean up the temporary file
+rm /tmp/compiler_output
+exit 0

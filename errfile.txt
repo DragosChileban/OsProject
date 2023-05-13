@@ -1,34 +1,4 @@
-process.c: In function ‘main’:
-process.c:9:5: error: unknown type name ‘regex_t’; did you mean ‘gregset_t’?
-    9 |     regex_t extension,extensionC;
-      |     ^~~~~~~
-      |     gregset_t
-process.c:12:9: warning: implicit declaration of function ‘S_ISREG’ [-Wimplicit-function-declaration]
-   12 |     if (S_ISREG(sb.st_mode))
-      |         ^~~~~~~
-process.c:12:17: error: ‘sb’ undeclared (first use in this function); did you mean ‘sbrk’?
-   12 |     if (S_ISREG(sb.st_mode))
-      |                 ^~
-      |                 sbrk
-process.c:12:17: note: each undeclared identifier is reported only once for each function it appears in
-process.c:15:9: warning: implicit declaration of function ‘regFileMenu’ [-Wimplicit-function-declaration]
-   15 |         regFileMenu(sb,path);
-      |         ^~~~~~~~~~~
-process.c:15:24: error: ‘path’ undeclared (first use in this function)
-   15 |         regFileMenu(sb,path);
-      |                        ^~~~
-process.c:17:12: warning: implicit declaration of function ‘regcomp’ [-Wimplicit-function-declaration]
-   17 |         if(regcomp(&extensionC,".c$",REG_EXTENDED !=0))
-      |            ^~~~~~~
-process.c:17:38: error: ‘REG_EXTENDED’ undeclared (first use in this function)
-   17 |         if(regcomp(&extensionC,".c$",REG_EXTENDED !=0))
-      |                                      ^~~~~~~~~~~~
-process.c:22:12: warning: implicit declaration of function ‘regexec’ [-Wimplicit-function-declaration]
-   22 |         if(regexec(&extensionC,path, 0, NULL, 0) == 0)
-      |            ^~~~~~~
-process.c:25:17: warning: unused variable ‘wstatus’ [-Wunused-variable]
-   25 |             int wstatus;
-      |                 ^~~~~~~
-process.c:10:11: warning: variable ‘validCommands’ set but not used [-Wunused-but-set-variable]
-   10 |     char *validCommands;
-      |           ^~~~~~~~~~~~~
+test.c: In function ‘main’:
+test.c:5:7: warning: ‘a’ is used uninitialized in this function [-Wuninitialized]
+    5 |     a = a+1;
+      |     ~~^~~~~

@@ -17,6 +17,62 @@
 
 struct stat inf; 
 char choice[10];
+int nr_childs;
+
+void access_rights(struct stat inf) {
+    printf("User: \n \n");
+    printf("-Read - ");
+    if (inf.st_mode & S_IRUSR)
+        printf("yes\n");
+    else
+        printf("no\n");
+    printf("-Write - ");
+    if (inf.st_mode & S_IWUSR)
+        printf("yes\n");
+    else
+        printf("no\n");
+    printf("-Execute - ");
+    if (inf.st_mode & S_IXUSR)
+        printf("yes\n");
+    else
+        printf("no\n");
+
+    
+    printf("\nGroup: \n \n");
+    printf("-Read - ");
+    if (inf.st_mode & S_IRGRP)
+        printf("yes\n");
+    else
+        printf("no\n");
+    printf("-Write - ");
+    if (inf.st_mode & S_IWGRP)
+        printf("yes\n");
+    else
+        printf("no\n");
+    printf("-Execute - ");
+    if (inf.st_mode & S_IXGRP)
+        printf("yes\n");
+    else
+        printf("no\n");
+
+
+    printf("\nOthers: \n \n");
+    printf("-Read - ");
+    if (inf.st_mode & S_IROTH)
+        printf("yes\n");
+    else
+        printf("no\n");
+    printf("-Write - ");
+    if (inf.st_mode & S_IWOTH)
+        printf("yes\n");
+    else
+        printf("no\n");
+    printf("-Execute - ");
+    if (inf.st_mode & S_IXOTH)
+        printf("yes\n");
+    else
+        printf("no\n");
+}
 
 void print_reg_menu() {
     printf("Menu for regular file \n");
@@ -39,16 +95,24 @@ void reg_options(char * choice, char * name) {
             printf("Number of hard links is %ld\n", inf.st_nlink);
         if(choice[i] == 'm')
             printf("Time of last modification %s\n",ctime(&inf.st_atime));
-        if(choice[i] == 'a')
+        if(choice[i] == 'a') {
             printf("Access rights %d %d\n",inf.st_uid,inf.st_gid);
+            access_rights(inf);
+        }
         if(choice[i] == 'l') {
             printf("Create a symbolic link give:link name -l \n");
             printf("Introduce the name of the new link\n");
             char link[100];
             scanf("%s",link);
-            symlink(name,link);
+            // symlink(name,link);
+            if (symlink(name, link) == -1) {
+                fprintf(stderr, "ERROR!\n");
+                fprintf(stderr, "Could not create the symbolic link!");
+                exit(1);
+            }
         }
     }
+    printf("\n");
 }
 
 void reg_read(char *name) {
@@ -59,14 +123,14 @@ void reg_read(char *name) {
         scanf("%s", choice);
         if(choice[0] != '-') {
             is_valid = 0;
-            system("clear");
+            // system("clear");
             printf("Your option choice is not valid!\n");
         }
         else {
             for(int i = 1; i < strlen(choice); i++)
                 if(strchr("ndhmal", choice[i]) == NULL) {
                     is_valid = 0;
-                    system("clear");
+                    // system("clear");
                     printf("Your option choice is not valid!\n");
                     break;
                 }
@@ -87,23 +151,27 @@ void print_link_menu() {
 }
 
 void link_options(char * choice, char * name) {
-    for(int i = 1; i < strlen(choice); i++) {
-        printf("%c ", choice[i]);
-        if(choice[i] == 'n')
-            printf("Link name : %s \n",name);
-        if(choice[i] == 'l') {
-            unlink(name);   
-            printf("Deleting the link : %s\n",name);  
+    if(strchr(choice, 'l')) {
+        unlink(name);   
+        printf("Deleting the link : %s\n",name);
+    }
+    else {
+        for(int i = 1; i < strlen(choice); i++) {
+            printf("%c ", choice[i]);
+            if(choice[i] == 'n')
+                printf("Link name : %s \n",name);
+            if(choice[i] == 'd')
+                printf("Size of the link %ld \n",inf.st_size);
+            if(choice[i] == 't')  {
+                struct stat sbNew;
+                stat(name, &sbNew);
+                printf("Size of the target %ld\n",sbNew.st_size);
+            }
+            if(choice[i] == 'a') {
+                printf("Access rights   %d %d\n",inf.st_uid,inf.st_gid);
+                access_rights(inf);
+            }
         }
-        if(choice[i] == 'd')
-            printf("Size of the link %ld \n",inf.st_size);
-        if(choice[i] == 't')  {
-            struct stat sbNew;
-            stat(name, &sbNew);
-            printf("Size of the target %ld\n",sbNew.st_size);
-        }
-        if(choice[i] == 'a')
-            printf("Access rights   %d %d\n",inf.st_uid,inf.st_gid);
     }
 }
 
@@ -115,14 +183,14 @@ void link_read(char *name) {
         scanf("%s", choice);
         if(choice[0] != '-') {
             is_valid = 0;
-            system("clear");
+            // system("clear");
             printf("Your option choice is not valid!\n");
         }
         else {
             for(int i = 1; i < strlen(choice); i++)
                 if(!strchr("nldta", choice[i])) {
                     is_valid = 0;
-                    system("clear");
+                    // system("clear");
                     printf("Your option choice is not valid!\n");
                     break;
                 }
@@ -147,6 +215,11 @@ void dir_options(char * choice, char * name) {
             printf("Directory name is %s \n", name);
         if(choice[i] == 'd')
             printf("Directo size is %ld\n", inf.st_size);
+        if(choice[i] == 'a') {
+            printf("Access rights   %d %d\n",inf.st_uid,inf.st_gid);
+            access_rights(inf);
+        }
+        
     }
 }
 
@@ -158,14 +231,14 @@ void dir_read(char *name) {
         scanf("%s", choice);
         if(choice[0] != '-') {
             is_valid = 0;
-            system("clear");
+            // system("clear");
             printf("Your option choice is not valid!\n");
         }
         else {
             for(int i = 1; i < strlen(choice); i++)
                 if(strchr("ndac", choice[i]) == NULL) {
                     is_valid = 0;
-                    system("clear");
+                    // system("clear");
                     printf("Your option choice is not valid!\n");
                     break;
                 }
@@ -175,7 +248,20 @@ void dir_read(char *name) {
     dir_options(choice, name);
 }
 
-void checkCfile(char *path) {
+int compute_score(int err, int war) {
+    int score;
+    if(!err && !war)
+        score = 10;
+    if(err)
+        score = 1;
+    else if(war > 10)
+            score = 2;
+    else
+        score = 2 + 8*(10 - war)/10;
+    return score;
+}
+
+int checkCfile(char *path) {
     regex_t extensionC;
     char buff[512];
     if(regcomp(&extensionC,".c$",REG_EXTENDED !=0)) {
@@ -184,63 +270,84 @@ void checkCfile(char *path) {
 
     if(regexec(&extensionC,path, 0, NULL, 0) == 0) {
         int pfd[2];
-        // int pid;
+        int pid;
         if(pipe(pfd)<0) {
             perror("Pipe creation error\n");
-            exit(1);
+            exit(69);
         }
         pid_t cpid = fork();
         if(cpid == -1) {
             perror("Fork failure \n");
             exit(EXIT_FAILURE);
         }
+        nr_childs++;
     
         if(cpid == 0) {
             close(pfd[0]); 
             dup2(pfd[1], 1);
-            execlp("bash","bash","checkerr.sh",path,"errfile.txt",NULL);
+            execlp("sh","sh","checkerr.sh",path,NULL);
             printf("!GOOOD");
             exit(1);     
         }  
+        // char tmp[1];
         close(pfd[1]);
         read(pfd[0],buff,512);
+        close(pfd[0]);
+        // printf("buff   %s", buff);
+        
         char *p;
         p = strtok(buff, " ");
         int nr_err = atoi(p);
         p = strtok(NULL, " ");
         int nr_war = atoi(p);
-        printf("%d %d\n", nr_err, nr_war);
+        
+        return compute_score(nr_err, nr_war);
+        // printf("errors %d warnings %d\n", nr_err, nr_war);
     }
+    return 0;
 
+}
+
+void check_menu(struct stat inf,char *path) {
+    pid_t pid = fork();
+    if(pid == -1) {
+        perror("Fork failure \n");
+        exit(EXIT_FAILURE);
+    }
+    nr_childs++;
+    if(pid == 0) {
+        printf("Current file:  %s is a ", path);
+ 
+        if (S_ISREG(inf.st_mode)) {
+            printf("regular file\n");
+            reg_read(path);
+        }
+        if(S_ISLNK(inf.st_mode)) {
+            printf("symbolic link\n");
+            link_read(path);
+        }
+        if(S_ISDIR(inf.st_mode)) {
+            printf("directory\n");
+        }
+    }
 }
 
 void process_file(struct stat inf,char *path) {
    
-    // pid_t pid = fork();
-    // if(pid == -1) {
-    //     perror("Fork failure \n");
-    //     exit(EXIT_FAILURE);
-    // }
-    // if(pid == 0) {
-    //     printf("Current file:  %s is a ", path);
- 
-    //     if (S_ISREG(inf.st_mode)) {
-    //         printf("regular file\n");
-    //         reg_read(path);
-    //     }
-    //     if(S_ISLNK(inf.st_mode)) {
-    //         printf("symbolic link\n");
-    //         link_read(path);
-    //     }
-    //     if(S_ISDIR(inf.st_mode)) {
-    //         printf("directory\n");
-    //     }
-    // }
+    check_menu(inf, path);
+    int score = checkCfile(path);
+    
+    // printf("childs   %d\n", nr_childs);
+    for(int i = 0; i < nr_childs; i++) {
+        int status;
+        pid_t w;
+        w = wait(&status);
+        if(w == -1)
+            exit(70);
+    }
 
-    checkCfile(path);
-
-    wait(NULL);
-    // wait(NULL);
+    printf("The score is: %d\n", score);
+    printf("\n\n");
 }
 
 
@@ -253,6 +360,7 @@ int main(int argc, char * argv[]) {
             perror("lstat");
             exit(EXIT_FAILURE);
         }
+        nr_childs = 0;
         process_file(inf, argv[i]);
     }
     return 0;
